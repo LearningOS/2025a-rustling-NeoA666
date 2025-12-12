@@ -19,8 +19,6 @@
 //
 // 这次没有提示！
 
-// I AM NOT DONE
-
 pub enum Command {
     Uppercase,
     Trim,
