@@ -50,13 +50,23 @@ where
 
     // Insert a value into the BST
     fn insert(&mut self, value: T) {
-        //TODO
+        match self.root {
+            None => self.root = Some(Box::new(TreeNode::new(value))),
+            Some(ref mut node) => node.insert(value),
+        }
     }
 
     // Search for a value in the BST
     fn search(&self, value: T) -> bool {
-        //TODO
-        true
+        let mut cur = self.root.as_ref();
+        while let Some(node) = cur {
+            match value.cmp(&node.value) {
+                Ordering::Less => cur = node.left.as_ref(),
+                Ordering::Greater => cur = node.right.as_ref(),
+                Ordering::Equal => return true,
+            }
+        }
+        false
     }
 }
 
@@ -66,7 +76,17 @@ where
 {
     // Insert a node into the tree
     fn insert(&mut self, value: T) {
-        //TODO
+        match value.cmp(&self.value) {
+            Ordering::Less => match self.left {
+                Some(ref mut left) => left.insert(value),
+                None => self.left = Some(Box::new(TreeNode::new(value))),
+            },
+            Ordering::Greater => match self.right {
+                Some(ref mut right) => right.insert(value),
+                None => self.right = Some(Box::new(TreeNode::new(value))),
+            },
+            Ordering::Equal => {}
+        }
     }
 }
 
@@ -121,6 +141,6 @@ mod tests {
             None => panic!("Root should not be None after insertion"),
         }
     }
-}    
+}
 
 

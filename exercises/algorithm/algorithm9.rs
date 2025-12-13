@@ -37,13 +37,21 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.count += 1;
+        self.items.push(value);
+        let mut idx = self.count;
+        while idx > 1 && (self.comparator)(&self.items[idx], &self.items[self.parent_idx(idx)]) {
+            let parent = self.parent_idx(idx);
+            self.items.swap(idx, parent);
+            idx = parent;
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
         idx / 2
     }
 
+    // 简化为直接判断左子是否存在，右子不可能在没有左子的情况下存在
     fn children_present(&self, idx: usize) -> bool {
         self.left_child_idx(idx) <= self.count
     }
@@ -56,9 +64,17 @@ where
         self.left_child_idx(idx) + 1
     }
 
+    // 选择符合比较器规则的“更优”子节点（最小堆选更小，最大堆选更大）
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+        if right > self.count {
+            left
+        } else if (self.comparator)(&self.items[left], &self.items[right]) {
+            left
+        } else {
+            right
+        }
     }
 }
 
@@ -84,8 +100,28 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+        // 弹出根节点（索引1），并将最后一个元素移到根
+        let root = self.items.swap_remove(1);
+        self.count -= 1;
+
+        // 下滤：仅当仍有元素需要维护堆性质时进行
+        if self.count > 0 {
+            let mut idx = 1;
+            while self.left_child_idx(idx) <= self.count {
+                let child = self.smallest_child_idx(idx);
+                if (self.comparator)(&self.items[child], &self.items[idx]) {
+                    self.items.swap(child, idx);
+                    idx = child;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        Some(root)
     }
 }
 
